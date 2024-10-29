@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import statistics as stat
 import kmeansHelper as helper
+import analysis
 
 centroids = 0
 # K-means helper functions 
@@ -138,7 +139,32 @@ def main():
     print("\nInitial Centroids:")
     print(initial_centroids)
 
-    data = pd.read_csv('assignment3/weatherIncluded3.csv')
+    data = pd.read_csv('weatherIncluded3.csv')
+    columns = ['Air Temperature', 'Relative Humidity', 'Air Pressure', 'Track Temperature', 'Wind Speed']
+    data_points = data[columns].values.tolist()
+
+    # Cluster Evaluation: Intrinsic Sillhouette Score
+
+    # Evaluation 1: K-means clustering 
+    # Get all the points assigned to each cluster
+    df = pd.read_csv("weatherIncluded3.csv")
+    normalizedDf = helper.normalizeWeather(df)
+    k = 6
+    clusterPoints = analysis.get_all_clusters(k, clusters, normalizedDf, columns)
+    silCoefficients = []
+    for i in range(len(clusterPoints)):
+      for j in range(len(clusterPoints[i])):
+        # Cohesion point 
+        cohesionPoint = analysis.calculate_cohesion_point(clusterPoints[i][j], clusterPoints[i])
+        # Separation point
+        separationPoint = analysis.calculate_separation_point(clusterPoints[i][j], centroids, columns, i, clusterPoints)
+        # Calculate sillhouette coefficient 
+        silCoefficient = (separationPoint-cohesionPoint)/(max(cohesionPoint, separationPoint))
+        silCoefficients.append(silCoefficient)
+    print("\nSillhouette Score for k-means:", stat.mean(silCoefficients))
+
+
+    data = pd.read_csv('weatherIncluded3.csv')
     columns = ['Air Temperature', 'Relative Humidity', 'Air Pressure', 'Track Temperature', 'Wind Speed']
     data_points = data[columns].values.tolist()
 
@@ -156,11 +182,10 @@ def main():
     print("Noise points:")
     print(noise)
 
-    sil_score = silhouette_score(clusters)
+    sil_score = analysis.silhouette_score(clusters)
     print(f"\nSilhouette Score for DBSCAN: {sil_score}")
 
-    plot_clusters(clusters, noise)
-
+    analysis.plot_clusters(clusters, noise)
     
 
 if __name__ == '__main__':
