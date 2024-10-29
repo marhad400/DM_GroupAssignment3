@@ -1,34 +1,37 @@
 from PIL import Image
 import clustering
-import sys
 import argparse
-import math
 
 PALETTE_SIZE = 30
-
 TOP = 0
 LEFT = 1
 
 # Calculate the distance between two colors
-def diff3(a,b):
-    return (a[0]-b[0])**2 + (a[1] - b[1])**2 + (a[2] - b[2])**2
+def diff3(a, b):
+    return (a[0] - b[0])**2 + (a[1] - b[1])**2 + (a[2] - b[2])**2
 
 def main(fname, k=5, width=256, height=256, location=TOP, redraw=True):
+    # temp disable showing steps and enable rounding centroids
+    clustering.SHOW_STEPS = False
+    clustering.ROUND_CENTROIDS = True
+
     # Open given file
     with Image.open(fname) as im:
         # resize, preserving aspect ratio
-        im.thumbnail((width,height))
-        data = im.getdata()
-        # calculate clusters: which pixels are the most similar, and what is the mean value of each cluster
-        centers = clustering.lloyds(data, k, [0,1,2], n=20)
+        im.thumbnail((width, height))
+        data = list(im.getdata())
+        
+        # Call lloyds with global variables set for color palette processing...
+        centers, _ = clustering.lloyds(data, k, [0, 1, 2], n=20)
+        
         if not redraw:
             # Show cluster centers as color palette
-            for i,c in enumerate(centers):
-                pal = Image.new("RGB", (PALETTE_SIZE,PALETTE_SIZE), tuple(map(lambda x: int(round(x)), c)))
+            for i, c in enumerate(centers):
+                pal = Image.new("RGB", (PALETTE_SIZE, PALETTE_SIZE), tuple(map(lambda x: int(round(x)), c)))
                 if location == TOP:
-                    im.paste(pal, box=(i*PALETTE_SIZE,0))
+                    im.paste(pal, box=(i * PALETTE_SIZE, 0))
                 else:
-                    im.paste(pal, box=(0,i*PALETTE_SIZE))
+                    im.paste(pal, box=(0, i * PALETTE_SIZE))
         else:
             # Calculate new pixel values based on which center each (old) pixel value is closest to
             newdata = []
@@ -36,14 +39,17 @@ def main(fname, k=5, width=256, height=256, location=TOP, redraw=True):
                 mind = None 
                 val = None 
                 for c in centers:
-                    delta = diff3(d,c)
+                    delta = diff3(d, c)
                     if mind is None or delta < mind:
                         mind = delta 
                         val = c
                 newdata.append(tuple(map(lambda x: int(round(x)), val)))
             im.putdata(newdata)
         im.show()
-    
+
+    # reset global variables after processing again
+    clustering.SHOW_STEPS = True
+    clustering.ROUND_CENTROIDS = False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
