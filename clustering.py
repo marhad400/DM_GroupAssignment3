@@ -53,7 +53,6 @@ def lloyds(data, k, columns, centers=None, n=None, eps=None):
     # Final rounding of centroids if ROUND_CENTROIDS is True
     if ROUND_CENTROIDS:
         centroids = [[round(val) if not np.isnan(val) else 0 for val in centroid] for centroid in centroids]
-
     return centroids, data['Cluster']
 
 
