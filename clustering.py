@@ -98,9 +98,6 @@ def kmedoids(data, k, distance, centers=None, n=None, eps=None):
     # This function has to return a list of k cluster centroids (data instances!)
     pass
 
-def returnCentroids():
-   global centroids
-   return centroids
 
 def main(): 
 # Load the dataset
