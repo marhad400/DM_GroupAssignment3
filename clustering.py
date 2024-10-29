@@ -7,33 +7,55 @@ import statistics as stat
 import kmeansHelper as helper
 import analysis
 
-# K-means helper functions 
-# Normalization 
+SHOW_STEPS = True  # global variable in order to control steps visualization
+ROUND_CENTROIDS = False  # global variable in order to control centroid rounding
+
 
 # DO NOT CHANGE THE FOLLOWING LINE
-def kmeans(data, k, columns, centers=None, n=None, eps=None):
+def lloyds(data, k, columns, centers=None, n=None, eps=None):
 # DO NOT CHANGE THE PRECEDING LINE
-    # This function has to return a list of k cluster centers (lists of floats of the same length as columns)
+    if n is None:
+        n = 100
+
+    # Check if data is a list and convert to DataFrame if needed
+    if isinstance(data, list):
+        data = pd.DataFrame(data, columns=[f"x{i}" for i in range(len(data[0]))])
+
     if centers is None:
         centroids = helper.intializeCentroid(data, k, columns)
     else:
-        centroids = centers # otherwise, use the provided one (centers should be defined)
+        centroids = centers  # Use the provided centers if defined
 
     for iteration in range(n):
         # Assign clusters
         data['Cluster'] = helper.assign_clusters(data, centroids, columns)
-        
-        # Calculate new centroids
         new_centroids = helper.calculate_centroids(data, data['Cluster'], k, columns)
 
-        # Check for convergence...
+        # Show steps only if SHOW_STEPS is True
+        if SHOW_STEPS:
+            plt.figure()
+            if isinstance(columns[0], int):
+                plt.scatter(data.iloc[:, columns[0]], data.iloc[:, columns[1]], c=data['Cluster'], cmap='viridis')
+            else:
+                plt.scatter(data[columns[0]], data[columns[1]], c=data['Cluster'], cmap='viridis')
+            plt.scatter([c[0] for c in new_centroids], [c[1] for c in new_centroids], s=300, c='red', marker='X')
+            plt.xlabel(columns[0])
+            plt.ylabel(columns[1])
+            plt.title(f'Iteration {iteration + 1}')
+            plt.show()
+
         centroid_shifts = [np.linalg.norm(np.array(new) - np.array(old)) for new, old in zip(new_centroids, centroids)]
         if max(centroid_shifts) < 1e-4:
             break
 
         centroids = new_centroids
 
+    # Final rounding of centroids if ROUND_CENTROIDS is True
+    if ROUND_CENTROIDS:
+        centroids = [[round(val) for val in centroid] for centroid in centroids]
+
     return centroids, data['Cluster']
+
 
 
 
