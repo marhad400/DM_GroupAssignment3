@@ -115,11 +115,8 @@ def main():
     
 
     # Save the full DataFrame (with normalized and non-normalized columns) to a new CSV file
-    #normalizedDf.to_csv('normalized_weather_with_all_columns.csv', index=False)
+    normalizedDf.to_csv('normalized_weather_with_all_columns.csv', index=False)
     
-    # Display the first few rows of the normalized data
-    # print("First 5 rows only with normalized values for specified columns:")
-    # print(normalizedDf.head())
 
     print("\n\nK-means... ")
     # Visualize the clusters
@@ -140,7 +137,6 @@ def main():
     data_points = data[columns].values.tolist()
 
     # Cluster Evaluation: Intrinsic Sillhouette Score
-
     # Evaluation 1: K-means clustering 
     # Get all the points assigned to each cluster
     df = pd.read_csv("weatherIncluded3.csv")
@@ -169,10 +165,6 @@ def main():
     min_samples = 5
 
     clusters, noise = dbscan(data_points, columns, eps, min_samples)
-
-    # print("Clusters:")
-    # for i, cluster in enumerate(clusters):
-    #     print(f"Cluster {i+1}: {cluster}")
 
     print("\n\nDBSCAN...")
     print("Noise points:")
