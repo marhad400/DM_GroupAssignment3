@@ -7,7 +7,6 @@ import statistics as stat
 import kmeansHelper as helper
 import analysis
 
-centroids = 0
 # K-means helper functions 
 # Normalization 
 
