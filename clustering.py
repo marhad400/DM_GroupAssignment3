@@ -52,10 +52,9 @@ def lloyds(data, k, columns, centers=None, n=None, eps=None):
 
     # Final rounding of centroids if ROUND_CENTROIDS is True
     if ROUND_CENTROIDS:
-        centroids = [[round(val) for val in centroid] for centroid in centroids]
+        centroids = [[round(val) if not np.isnan(val) else 0 for val in centroid] for centroid in centroids]
 
     return centroids, data['Cluster']
-
 
 
 
@@ -140,7 +139,7 @@ def main():
     normalizedDf.to_csv('normalized_weather_with_all_columns.csv', index=False)
     
 
-    print("\n\nK-means... ")
+    print("\n\nClustering With K-Means")
     # Visualize the clusters
     plt.scatter(normalizedDf[columns[0]], normalizedDf[columns[1]], c=clusters, cmap='viridis')
     plt.scatter([c[0] for c in centroids], [c[1] for c in centroids], s=300, c='red', marker='X')  # Plot centroids
@@ -151,7 +150,7 @@ def main():
 
     # Testing initialize centroids with example values, 3 random rows representing the initial positions of the centroids
     initial_centroids = helper.intializeCentroid(normalizedDf, k=k, columns=columns)
-    print("\nInitial Centroids:")
+    print("Initial Centroids:")
     print(initial_centroids)
 
     data = pd.read_csv('weatherIncluded3.csv')
