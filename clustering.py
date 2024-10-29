@@ -133,7 +133,7 @@ def main():
 
     # Run the k-means algorithm
     global centroids
-    centroids, clusters =  kmeans(normalizedDf, k, columns, n=100)
+    centroids, clusters = lloyds(normalizedDf, k, columns, n=100)
     
 
     # Save the full DataFrame (with normalized and non-normalized columns) to a new CSV file
