@@ -6,9 +6,13 @@ from dbscan import dbscan
 
 def main():
 
-    data = pd.read_csv('weatherIncluded3.csv')
-    columns = ['Air Temperature', 'Relative Humidity', 'Air Pressure', 'Track Temperature', 'Wind Speed']
-    data_points = data[columns].values.tolist()
+    df = pd.read_csv('weatherIncluded3.csv')
+
+    df = rain_to_numerical(df)
+    df = teams_to_numerical(df)
+
+    columns = ['Air Temperature', 'Relative Humidity', 'Air Pressure', 'Track Temperature', 'Wind Speed', 'Rainfall', 'Race Point', 'Driver Team']
+    data_points = df[columns].values.tolist()
 
     # DBSCAN parameters
     eps = 20
@@ -26,7 +30,32 @@ def main():
     sil_score = silhouette_score(clusters)
     print(f"Silhouette Score: {sil_score}")
 
-    plot_clusters(clusters, noise)
+    x_feature_index = -1
+    y_feature_index = -2
+    x_label = columns[x_feature_index]
+    y_label = columns[y_feature_index]
+
+    plot_clusters(clusters, noise, x_feature_index, y_feature_index, 
+                x_label=x_label, y_label=y_label)
+
+
+def rain_to_numerical(df):
+
+    rain_value_dict = {True: 1, False: 0, "True": 1, "False": 0}
+    df['Rainfall'] = df['Rainfall'].map(rain_value_dict)
+
+    return df
+
+def teams_to_numerical(df):
+    
+    teams = df['Driver Team'].unique().tolist()
+
+    teams_dict = {item: i+1 for i, item in enumerate(teams)}
+    print(f'Teams: {teams_dict}')
+
+    df['Driver Team'] = df['Driver Team'].map(teams_dict)
+
+    return df
 
 
 def silhouette_score(clusters):
@@ -72,22 +101,24 @@ def silhouette_score(clusters):
     return overall_silhouette_score
 
 
-def plot_clusters(clusters, noise):
+def plot_clusters(clusters, noise, x_feature_index, y_feature_index, x_label, y_label):
     colors = plt.cm.get_cmap('tab10', len(clusters) + 1)
 
     plt.figure(figsize=(8, 6))
 
     for i, cluster in enumerate(clusters):
         cluster_points = np.array(cluster)
-        plt.scatter(cluster_points[:, 1], cluster_points[:, 2], s=50, color=colors(i), label=f'Cluster {i+1}')
+        plt.scatter(cluster_points[:, x_feature_index], cluster_points[:, y_feature_index], 
+                    s=50, color=colors(i), label=f'Cluster {i+1}')
     
     if noise:
         noise_points = np.array(noise)
-        plt.scatter(noise_points[:, 0], noise_points[:, 1], s=50, color='lightgrey', label='Noise')
+        plt.scatter(noise_points[:, x_feature_index], noise_points[:, y_feature_index], 
+                    s=50, color='lightgrey', label='Noise')
     
     plt.title("DBSCAN Clustering Results")
-    plt.xlabel("Relative Humidity")
-    plt.ylabel("Air Pressure")
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.legend()
     plt.show()
 
