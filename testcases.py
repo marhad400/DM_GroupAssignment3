@@ -11,38 +11,41 @@ random.seed(0)
 # Show a 2D scatterplot using two dimensions of the data 
 # Each point is colored based on which cluster center it is closest to 
 def plot(data, centers, x, y, scale=None):
-    def dist(point,center):
-        return math.sqrt((point[x] - center[0])**2 + (point[y] - center[1])**2)
+    def dist(point, center):
+        return math.sqrt((point[0] - center[0])**2 + (point[1] - center[1])**2)  # Only x, y points now
+
     xs, ys, colors = [], [], []
     for d in data:
-        mind = None 
-        cluster = None 
-        for i,c in enumerate(centers):
-            delta = dist(d, c)
+        mind = None
+        cluster = None
+        for i, c in enumerate(centers):
+            # Pass only x and y values from `d` to `dist`
+            delta = dist([d[x], d[y]], c)  # Assuming d[x] and d[y] are the specific values for x and y
             if mind is None or delta < mind:
                 mind = delta
                 cluster = i
         xs.append(d[x])
         ys.append(d[y])
         colors.append(cluster)
-        
+
+    # Remaining code for plotting centers and data points
     cxs, cys, ccolors = [], [], []
-    for i,c in enumerate(centers):
+    for i, c in enumerate(centers):
         cxs.append(c[0])
         cys.append(c[1])
         ccolors.append(i)
     if scale is None:
         fr = min(min(xs), min(ys), min(cxs), min(cys))
-        to = max(max(xs), max(ys), max(cys), max(cys))
-        range = (to-fr)
-        fr -= 0.01*range
-        to += 0.01*range
+        to = max(max(xs), max(ys), max(cxs), max(cys))
+        range = (to - fr)
+        fr -= 0.01 * range
+        to += 0.01 * range
     else:
-        fr,to = scale
+        fr, to = scale
     plt.scatter(xs, ys, c=colors)
-    plt.scatter(cxs, cys, c=ccolors, marker = "+")
-    plt.xlim((fr,to))
-    plt.ylim((fr,to))
+    plt.scatter(cxs, cys, c=ccolors, marker="+")
+    plt.xlim((fr, to))
+    plt.ylim((fr, to))
     plt.show()
     
 def show_centers(centers):
@@ -98,7 +101,7 @@ def lloyds_testcase(data, n, visualize=True):
             plot(data, centers, "x1", "x2", scale=(0,1))
         show_centers(centers)
     elif n == 7:
-        centers = clustering.lloyds(data, 6, ["x1","x2", 3, "x4"], n=10)
+        centers = clustering.lloyds(data, 6, ["x1","x2", "x3", "x4"], n=10)
         show_centers(centers)
     elif n == 8:
         centers = clustering.lloyds(data, 2, ["x1","x2"], n=5)
